@@ -18,54 +18,44 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
     <!-- 
-    PALETTE SELECTION: "Cyber Neon"
-    Background: #0f172a (Slate 900)
-    Surface: #1e293b (Slate 800)
-    Primary Text: #f1f5f9 (Slate 100)
-    Accent Cyan: #06b6d4 (Cyan 500) - Used for primary actions/highlights
-    Accent Pink: #ec4899 (Pink 500) - Used for critical warnings
-    Accent Violet: #8b5cf6 (Violet 500) - Used for secondary data
-    
-    NARRATIVE PLAN:
-    1. Hero Section: Hook the user with the gravity of web security. ADDED OFFICIAL GITHUB BUTTON.
-    2. The Ranking (Bar Chart): Immediate overview of the 10 items.
-    3. The Top 3 (Radar Chart): Deep dive into the most dangerous risks.
-    4. Risk Landscape (Scatter Plot): Analyzing Impact vs. Likelihood.
-    5. Anatomy of an Attack (CSS Flow): Visualizing Broken Access Control.
-    6. Full List Breakdown: Detailed cards for the remaining items.
-    
-    CONFIRMATION:
-    - NO SVG graphics used.
-    - NO Mermaid JS used.
-    - All charts use Canvas or WebGL.
-    - Label wrapping logic implemented.
+    PALETTE SELECTION: "Cyber Neon" (Dark Mode Enforced)
+    Dark Mode (Fixed):
+        Background: #0f172a (Slate 900)
+        Surface: #1e293b (Slate 800)
+        Primary Text: #f1f5f9 (Slate 100)
+        Accent Cyan: #06b6d4 (Cyan 500)
+        Accent Pink: #ec4899 (Pink 500)
+        Border/Grid: #334155 (Slate 700)
     -->
 
     <style>
+        /* BASE STYLES & FONT */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #f1f5f9;
         }
         
         h1, h2, h3, .mono-font {
             font-family: 'JetBrains Mono', monospace;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
+        /* --- DARK MODE (FIJO) --- */
+        body.dark {
+            background-color: #0f172a; /* Slate 900 */
+            color: #f1f5f9; /* Slate 100 */
         }
-        ::-webkit-scrollbar-track {
-            background: #0f172a; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155; 
-            border-radius: 5px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569; 
-        }
+        /* Custom themed classes for Dark Mode */
+        .dark .bg-nav-base { background-color: #0f172a; } /* Navigation base color */
+        .dark .bg-surface { background-color: #1e293b; } /* Card/Section background */
+        .dark .text-primary { color: #f1f5f9; }
+        .dark .text-secondary { color: #94a3b8; }
+        .dark .border-primary { border-color: #334155; }
+        .dark .chart-grid { border-color: #1e293b !important; }
+        .dark .flow-node-bg { background-color: #1e293b !important; border-color: #334155 !important; }
+
+        /* Custom Scrollbar for Dark Mode */
+        .dark::-webkit-scrollbar-track { background: #0f172a; }
+        .dark::-webkit-scrollbar-thumb { background: #334155; }
+        .dark::-webkit-scrollbar-thumb:hover { background: #475569; }
 
         /* Chart Container Base Styles */
         .chart-container {
@@ -76,90 +66,86 @@
         }
 
         /* Flow Chart Styles (Pure CSS) */
-        .flow-node {
-            position: relative;
-            z-index: 10;
-        }
+        .flow-node { position: relative; z-index: 10; }
         .flow-arrow {
-            flex-grow: 1;
-            height: 2px;
-            background: #334155;
-            position: relative;
-            margin: 0 10px;
+            flex-grow: 1; height: 2px; position: relative; margin: 0 10px;
         }
         .flow-arrow::after {
             content: '►';
-            position: absolute;
-            right: -6px;
-            top: -10px;
-            color: #334155;
-            font-size: 14px;
+            position: absolute; right: -6px; top: -10px; font-size: 14px;
         }
-        .flow-arrow.danger {
-            background: #ec4899;
-        }
-        .flow-arrow.danger::after {
-            color: #ec4899;
-        }
-
-        /* Plotly override to fit dark theme */
+        .flow-arrow.default { background: #334155; color: #334155; }
+        .flow-arrow.default::after { color: #334155; }
+        .flow-arrow.danger { background: #ec4899; color: #ec4899; }
+        .flow-arrow.danger::after { color: #ec4899; }
+        
+        /* Plotly override for dark theme */
         .js-plotly-plot .plotly .modebar {
             left: 50%;
             transform: translateX(-50%);
         }
+        
+        /* Aseguramos que los hover effects se vean bien sin la clase light */
+        .bg-surface:hover {
+             background-color: #334155; /* Un tono más claro de slate 700 al pasar el ratón */
+             transition: background-color 0.3s;
+        }
     </style>
 </head>
-<body class="antialiased overflow-x-hidden">
+<!-- Clase 'dark' fija -->
+<body class="antialiased overflow-x-hidden dark">
 
     <!-- Navigation / Header -->
-    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-lg">
+    <nav class="sticky top-0 z-50 bg-nav-base/90 backdrop-blur-md border-b border-primary shadow-lg">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex items-center">
                     <span class="text-cyan-500 text-2xl mr-2">🛡️</span>
-                    <span class="font-bold text-xl tracking-tight text-white mono-font">OWASP <span class="text-cyan-500">TOP 10</span></span>
+                    <span class="font-bold text-xl tracking-tight text-primary mono-font">OWASP <span class="text-cyan-500">TOP 10</span></span>
                 </div>
-                <div class="hidden md:block text-sm text-slate-400">
-                    Edición 2021
+                <div class="flex items-center">
+                    <div class="hidden md:block text-sm text-secondary mr-4">
+                        Edición 2021
+                    </div>
+                    
+                    <!-- Botón de tema eliminado según solicitud del usuario -->
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <header class="relative bg-slate-900 overflow-hidden">
+    <header class="relative dark:bg-slate-900 overflow-hidden">
         <div class="absolute inset-0">
-            <div class="absolute inset-0 bg-gradient-to-br from-cyan-900/20 to-pink-900/20"></div>
+            <div class="absolute inset-0 dark:bg-gradient-to-br from-cyan-900/20 to-pink-900/20"></div>
         </div>
         <div class="relative max-w-7xl mx-auto py-24 px-4 sm:px-6 lg:px-8 text-center">
             <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500 mb-6">
                 Riesgos Críticos de Seguridad Web
             </h1>
-            <p class="mt-4 max-w-2xl mx-auto text-xl text-slate-300">
+            <p class="mt-4 max-w-2xl mx-auto text-xl text-secondary">
                 Una guía visual esencial para entender las vulnerabilidades más peligrosas según OWASP. Protege tu arquitectura, valida tus datos y asegura tus accesos.
             </p>
             <div class="mt-8 flex justify-center gap-4">
-                <div class="bg-slate-800 border border-slate-700 p-4 rounded-lg shadow-lg">
-                    <span class="block text-3xl font-bold text-cyan-400">10</span>
-                    <span class="text-xs text-slate-400 uppercase tracking-widest">Vulnerabilidades</span>
+                <div class="bg-surface border border-primary p-4 rounded-lg shadow-lg">
+                    <span class="block text-3xl font-bold text-cyan-500">10</span>
+                    <span class="text-xs text-secondary uppercase tracking-widest">Vulnerabilidades</span>
                 </div>
-                <div class="bg-slate-800 border border-slate-700 p-4 rounded-lg shadow-lg">
+                <div class="bg-surface border border-primary p-4 rounded-lg shadow-lg">
                     <span class="block text-3xl font-bold text-pink-500">2021</span>
-                    <span class="text-xs text-slate-400 uppercase tracking-widest">Versión Vigente</span>
+                    <span class="text-xs text-secondary uppercase tracking-widest">Versión Vigente</span>
                 </div>
             </div>
             
-            <!-- CORRECCIÓN: Botón de GitHub para el repositorio fuente de OWASP -->
+            <!-- Botón de GitHub para el repositorio fuente de OWASP -->
             <div class="mt-8">
                 <a href="https://github.com/owasp/www-project-top-ten" target="_blank" rel="noopener noreferrer" 
-                   class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-xl text-white bg-cyan-500 hover:bg-cyan-600 transition duration-300 ease-in-out transform hover:scale-105 mono-font">
-                    
-                    <!-- Unicode Icon for GitHub (no SVG) -->
+                   class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-full shadow-xl text-white dark:bg-cyan-500 dark:hover:bg-cyan-600 transition duration-300 ease-in-out transform hover:scale-105 mono-font">
                     <span class="mr-2 text-xl">🔗</span>
                     Ver Repositorio Oficial (GitHub)
                 </a>
             </div>
-            <!-- FIN CORRECCIÓN -->
+            <!-- FIN Botón -->
 
         </div>
     </header>
@@ -170,19 +156,19 @@
         <section>
             <div class="md:flex md:items-center md:justify-between mb-8">
                 <div class="md:w-2/3">
-                    <h2 class="text-3xl font-bold text-white mb-4 border-l-4 border-cyan-500 pl-4">El Ranking Oficial</h2>
-                    <p class="text-slate-400 text-lg leading-relaxed">
+                    <h2 class="text-3xl font-bold text-primary mb-4 border-l-4 border-cyan-500 pl-4">El Ranking Oficial</h2>
+                    <p class="text-secondary text-lg leading-relaxed">
                         El Top 10 no es aleatorio; refleja la frecuencia, severidad y potencial de impacto de cada riesgo. En 2021, vimos cambios drásticos: <strong>Broken Access Control</strong> subió al primer puesto, superando a las inyecciones tradicionales.
                     </p>
                 </div>
             </div>
 
-            <div class="bg-slate-800 rounded-xl shadow-2xl p-6 border border-slate-700">
+            <div class="bg-surface rounded-xl shadow-2xl p-6 border border-primary">
                 <!-- Chart Container: Responsive height logic handled here and in script -->
                 <div class="chart-container h-[400px] md:h-[500px] w-full max-w-5xl mx-auto">
                     <canvas id="rankingChart"></canvas>
                 </div>
-                <p class="mt-4 text-center text-sm text-slate-500 italic">
+                <p class="mt-4 text-center text-sm text-secondary italic">
                     Fuente: OWASP Top 10 - 2021. Los valores representan la posición inversa (Más alto = Mayor Riesgo).
                 </p>
             </div>
@@ -191,33 +177,33 @@
         <!-- SECTION 2: Deep Dive Top 3 (Cards + Radar) -->
         <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
-                <h2 class="text-3xl font-bold text-white mb-6 border-l-4 border-pink-500 pl-4">Análisis de los "3 Grandes"</h2>
-                <p class="text-slate-400 mb-8">
+                <h2 class="text-3xl font-bold text-primary mb-6 border-l-4 border-pink-500 pl-4">Análisis de los "3 Grandes"</h2>
+                <p class="text-secondary mb-8">
                     Estos tres riesgos representan la mayor amenaza actual. Comparamos sus perfiles basándonos en <strong>Explotabilidad</strong> (qué tan fácil es atacar), <strong>Prevalencia</strong> (qué tan común es) e <strong>Impacto Técnico</strong> (daño potencial).
                 </p>
                 
                 <div class="space-y-4">
                     <!-- Card 1 -->
-                    <div class="bg-slate-800 p-4 rounded-lg border-l-4 border-cyan-500 hover:bg-slate-750 transition-colors">
-                        <h3 class="text-lg font-bold text-cyan-400">1. Broken Access Control</h3>
-                        <p class="text-sm text-slate-300">Usuarios actuando fuera de sus permisos permitidos. Es el riesgo #1 por su ubicuidad.</p>
+                    <div class="bg-surface p-4 rounded-lg border-l-4 border-cyan-500 hover:bg-slate-700">
+                        <h3 class="text-lg font-bold text-cyan-500">1. Broken Access Control</h3>
+                        <p class="text-sm text-secondary">Usuarios actuando fuera de sus permisos permitidos. Es el riesgo #1 por su ubicuidad.</p>
                     </div>
                     <!-- Card 2 -->
-                    <div class="bg-slate-800 p-4 rounded-lg border-l-4 border-purple-500 hover:bg-slate-750 transition-colors">
-                        <h3 class="text-lg font-bold text-purple-400">2. Cryptographic Failures</h3>
-                        <p class="text-sm text-slate-300">Datos sensibles expuestos por cifrado débil o inexistente. Antes conocido como "Sensitive Data Exposure".</p>
+                    <div class="bg-surface p-4 rounded-lg border-l-4 border-violet-500 hover:bg-slate-700">
+                        <h3 class="text-lg font-bold text-violet-500">2. Cryptographic Failures</h3>
+                        <p class="text-sm text-secondary">Datos sensibles expuestos por cifrado débil o inexistente. Antes conocido como "Sensitive Data Exposure".</p>
                     </div>
                     <!-- Card 3 -->
-                    <div class="bg-slate-800 p-4 rounded-lg border-l-4 border-pink-500 hover:bg-slate-750 transition-colors">
-                        <h3 class="text-lg font-bold text-pink-400">3. Injection</h3>
-                        <p class="text-sm text-slate-300">Datos no confiables enviados a intérpretes (SQL, OS, NoSQL). Bajó al puesto 3 pero sigue siendo devastador.</p>
+                    <div class="bg-surface p-4 rounded-lg border-l-4 border-pink-500 hover:bg-slate-700">
+                        <h3 class="text-lg font-bold text-pink-500">3. Injection</h3>
+                        <p class="text-sm text-secondary">Datos no confiables enviados a intérpretes (SQL, OS, NoSQL). Bajó al puesto 3 pero sigue siendo devastador.</p>
                     </div>
                 </div>
             </div>
 
             <!-- Radar Chart Container -->
-            <div class="bg-slate-800 rounded-xl shadow-xl p-6 border border-slate-700 flex flex-col justify-center items-center">
-                <h4 class="text-slate-300 mb-4 font-bold tracking-wide uppercase text-sm">Perfil de Amenaza</h4>
+            <div class="bg-surface rounded-xl shadow-xl p-6 border border-primary flex flex-col justify-center items-center">
+                <h4 class="text-secondary mb-4 font-bold tracking-wide uppercase text-sm">Perfil de Amenaza</h4>
                 <div class="chart-container w-full max-w-md h-[350px] md:h-[400px]">
                     <canvas id="radarChart"></canvas>
                 </div>
@@ -226,21 +212,21 @@
 
         <!-- SECTION 3: Risk Matrix (Plotly Scatter) -->
         <section>
-            <h2 class="text-3xl font-bold text-white mb-4 border-l-4 border-purple-500 pl-4">Matriz de Riesgo: Impacto vs. Probabilidad</h2>
-            <p class="text-slate-400 mb-8 max-w-3xl">
+            <h2 class="text-3xl font-bold text-primary mb-4 border-l-4 border-violet-500 pl-4">Matriz de Riesgo: Impacto vs. Probabilidad</h2>
+            <p class="text-secondary mb-8 max-w-3xl">
                 Visualización de los 10 riesgos distribuidos en una matriz clásica de seguridad. Los elementos en la esquina superior derecha (Alta Probabilidad, Alto Impacto) requieren atención inmediata.
             </p>
             
-            <div class="bg-slate-800 rounded-xl shadow-2xl p-4 border border-slate-700 overflow-hidden">
+            <div class="bg-surface rounded-xl shadow-2xl p-4 border border-primary overflow-hidden">
                 <!-- Plotly Container -->
                 <div id="riskMatrix" class="w-full h-[500px] max-w-6xl mx-auto"></div>
             </div>
         </section>
 
         <!-- SECTION 4: Anatomy of a Vulnerability (CSS Flow) -->
-        <section class="bg-slate-900 rounded-2xl border border-slate-800 p-8 shadow-inner">
-            <h2 class="text-2xl md:text-3xl font-bold text-white mb-2 text-center">Anatomía: Broken Access Control</h2>
-            <p class="text-center text-slate-400 mb-10 max-w-2xl mx-auto">
+        <section class="flow-node-bg rounded-2xl border border-primary p-8 shadow-inner">
+            <h2 class="text-2xl md:text-3xl font-bold text-primary mb-2 text-center">Anatomía: Broken Access Control</h2>
+            <p class="text-center text-secondary mb-10 max-w-2xl mx-auto">
                 ¿Cómo ocurre realmente? Un usuario normal manipula una URL o ID para acceder a recursos de administrador sin que el servidor verifique los permisos.
             </p>
 
@@ -248,22 +234,22 @@
             <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 max-w-5xl mx-auto">
                 
                 <!-- Node 1 -->
-                <div class="flow-node bg-slate-700 p-6 rounded-lg text-center w-full md:w-48 shadow-lg border border-slate-600">
+                <div class="flow-node bg-surface p-6 rounded-lg text-center w-full md:w-48 shadow-lg border border-primary">
                     <div class="text-3xl mb-2">👤</div>
-                    <div class="font-bold text-slate-200">Atacante</div>
-                    <div class="text-xs text-slate-400">Usuario Logueado<br>(ID: 101)</div>
+                    <div class="font-bold text-primary">Atacante</div>
+                    <div class="text-xs text-secondary">Usuario Logueado<br>(ID: 101)</div>
                 </div>
 
                 <!-- Arrow -->
-                <div class="hidden md:block flow-arrow"></div>
-                <div class="md:hidden text-2xl text-slate-500">⬇️</div>
+                <div class="hidden md:block flow-arrow default"></div>
+                <div class="md:hidden text-2xl dark:text-slate-500">⬇️</div>
 
                 <!-- Node 2 -->
-                <div class="flow-node bg-slate-800 p-6 rounded-lg text-center w-full md:w-64 border-2 border-dashed border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.2)]">
+                <div class="flow-node bg-surface p-6 rounded-lg text-center w-full md:w-64 border-2 border-dashed border-pink-500 dark:shadow-[0_0_15px_rgba(236,72,153,0.2)]">
                     <div class="text-3xl mb-2">🌐</div>
-                    <div class="font-bold text-pink-400">Petición Manipulada</div>
-                    <code class="block mt-2 bg-black/50 p-2 rounded text-xs text-green-400 font-mono">GET /admin/delete?id=5</code>
-                    <div class="text-xs text-red-400 mt-1 font-bold">⚠️ FALTA VALIDACIÓN</div>
+                    <div class="font-bold text-pink-500">Petición Manipulada</div>
+                    <code class="block mt-2 dark:bg-black/50 p-2 rounded text-xs text-pink-500 font-mono">GET /admin/delete?id=5</code>
+                    <div class="text-xs text-red-500 mt-1 font-bold">⚠️ FALTA VALIDACIÓN</div>
                 </div>
 
                 <!-- Arrow -->
@@ -271,10 +257,10 @@
                 <div class="md:hidden text-2xl text-pink-500">⬇️</div>
 
                 <!-- Node 3 -->
-                <div class="flow-node bg-slate-700 p-6 rounded-lg text-center w-full md:w-48 shadow-lg border border-slate-600">
+                <div class="flow-node bg-surface p-6 rounded-lg text-center w-full md:w-48 shadow-lg border border-primary">
                     <div class="text-3xl mb-2">🗄️</div>
-                    <div class="font-bold text-slate-200">Base de Datos</div>
-                    <div class="text-xs text-slate-400">Ejecuta acción administrativa</div>
+                    <div class="font-bold text-primary">Base de Datos</div>
+                    <div class="text-xs text-secondary">Ejecuta acción administrativa</div>
                 </div>
 
             </div>
@@ -282,146 +268,147 @@
 
         <!-- SECTION 5: The Full Breakdown (Grid) -->
         <section>
-            <h2 class="text-3xl font-bold text-white mb-8 border-l-4 border-green-500 pl-4">El Resto del Top 10</h2>
+            <h2 class="text-3xl font-bold text-primary mb-8 border-l-4 border-green-500 pl-4">El Resto del Top 10</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 
                 <!-- Card 4 -->
-                <div class="bg-slate-800 rounded-lg p-6 shadow-md border-t-4 border-blue-500">
+                <div class="bg-surface rounded-lg p-6 shadow-md border-t-4 border-blue-500">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-lg font-bold text-slate-100">4. Insecure Design</h3>
-                        <span class="text-xs bg-blue-900 text-blue-300 px-2 py-1 rounded">Arquitectura</span>
+                        <h3 class="text-lg font-bold text-primary">4. Insecure Design</h3>
+                        <span class="text-xs dark:bg-blue-900 dark:text-blue-300 px-2 py-1 rounded">Arquitectura</span>
                     </div>
-                    <p class="text-slate-400 text-sm">No es un bug de código, sino una falla en el diseño. Falta de modelado de amenazas o patrones de diseño inseguros.</p>
+                    <p class="text-secondary text-sm">No es un bug de código, sino una falla en el diseño. Falta de modelado de amenazas o patrones de diseño inseguros.</p>
                 </div>
 
                 <!-- Card 5 -->
-                <div class="bg-slate-800 rounded-lg p-6 shadow-md border-t-4 border-yellow-500">
+                <div class="bg-surface rounded-lg p-6 shadow-md border-t-4 border-yellow-500">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-lg font-bold text-slate-100">5. Security Misconfiguration</h3>
-                        <span class="text-xs bg-yellow-900 text-yellow-300 px-2 py-1 rounded">Config</span>
+                        <h3 class="text-lg font-bold text-primary">5. Security Misconfiguration</h3>
+                        <span class="text-xs dark:bg-yellow-900 dark:text-yellow-300 px-2 py-1 rounded">Config</span>
                     </div>
-                    <p class="text-slate-400 text-sm">Permisos por defecto, headers HTTP faltantes, mensajes de error con trazas completas. Muy común en Cloud.</p>
+                    <p class="text-secondary text-sm">Permisos por defecto, headers HTTP faltantes, mensajes de error con trazas completas. Muy común en Cloud.</p>
                 </div>
 
                 <!-- Card 6 -->
-                <div class="bg-slate-800 rounded-lg p-6 shadow-md border-t-4 border-orange-500">
+                <div class="bg-surface rounded-lg p-6 shadow-md border-t-4 border-orange-500">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-lg font-bold text-slate-100">6. Vuln. & Outdated Components</h3>
-                        <span class="text-xs bg-orange-900 text-orange-300 px-2 py-1 rounded">Supply Chain</span>
+                        <h3 class="text-lg font-bold text-primary">6. Vuln. & Outdated Components</h3>
+                        <span class="text-xs dark:bg-orange-900 dark:text-orange-300 px-2 py-1 rounded">Supply Chain</span>
                     </div>
-                    <p class="text-slate-400 text-sm">Uso de librerías o frameworks (npm, pip, maven) con CVEs conocidos. ¡Actualiza tus dependencias!</p>
+                    <p class="text-secondary text-sm">Uso de librerías o frameworks (npm, pip, maven) con CVEs conocidos. ¡Actualiza tus dependencias!</p>
                 </div>
 
                 <!-- Card 7 -->
-                <div class="bg-slate-800 rounded-lg p-6 shadow-md border-t-4 border-red-500">
+                <div class="bg-surface rounded-lg p-6 shadow-md border-t-4 border-red-500">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-lg font-bold text-slate-100">7. Ident. & Auth Failures</h3>
-                        <span class="text-xs bg-red-900 text-red-300 px-2 py-1 rounded">Auth</span>
+                        <h3 class="text-lg font-bold text-primary">7. Ident. & Auth Failures</h3>
+                        <span class="text-xs dark:bg-red-900 dark:text-red-300 px-2 py-1 rounded">Auth</span>
                     </div>
-                    <p class="text-slate-400 text-sm">Permitir fuerza bruta, no usar MFA, gestión de sesiones débil o exposición de IDs de sesión en URL.</p>
+                    <p class="text-secondary text-sm">Permitir fuerza bruta, no usar MFA, gestión de sesiones débil o exposición de IDs de sesión en URL.</p>
                 </div>
 
                 <!-- Card 8 -->
-                <div class="bg-slate-800 rounded-lg p-6 shadow-md border-t-4 border-indigo-500">
+                <div class="bg-surface rounded-lg p-6 shadow-md border-t-4 border-indigo-500">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-lg font-bold text-slate-100">8. Software & Data Integrity</h3>
-                        <span class="text-xs bg-indigo-900 text-indigo-300 px-2 py-1 rounded">CI/CD</span>
+                        <h3 class="text-lg font-bold text-primary">8. Software & Data Integrity</h3>
+                        <span class="text-xs dark:bg-indigo-900 dark:text-indigo-300 px-2 py-1 rounded">CI/CD</span>
                     </div>
-                    <p class="text-slate-400 text-sm">Código o datos modificados sin detección. Incluye actualizaciones inseguras y pipelines CI/CD comprometidos.</p>
+                    <p class="text-secondary text-sm">Código o datos modificados sin detección. Incluye actualizaciones inseguras y pipelines CI/CD comprometidos.</p>
                 </div>
 
                 <!-- Card 9 -->
-                <div class="bg-slate-800 rounded-lg p-6 shadow-md border-t-4 border-gray-500">
+                <div class="bg-surface rounded-lg p-6 shadow-md border-t-4 border-gray-500">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-lg font-bold text-slate-100">9. Logging & Monitoring Failures</h3>
-                        <span class="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">Ops</span>
+                        <h3 class="text-lg font-bold text-primary">9. Logging & Monitoring Failures</h3>
+                        <span class="text-xs dark:bg-gray-700 dark:text-gray-300 px-2 py-1 rounded">Ops</span>
                     </div>
-                    <p class="text-slate-400 text-sm">La incapacidad de detectar una brecha activa. Sin logs, los atacantes tienen tiempo infinito.</p>
+                    <p class="text-secondary text-sm">La incapacidad de detectar una brecha activa. Sin logs, los atacantes tienen tiempo infinito.</p>
                 </div>
 
                 <!-- Card 10 -->
-                <div class="bg-slate-800 rounded-lg p-6 shadow-md border-t-4 border-teal-500 lg:col-span-3">
+                <div class="bg-surface rounded-lg p-6 shadow-md border-t-4 border-teal-500 lg:col-span-3">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="text-lg font-bold text-slate-100">10. Server-Side Request Forgery (SSRF)</h3>
-                        <span class="text-xs bg-teal-900 text-teal-300 px-2 py-1 rounded">Network</span>
+                        <h3 class="text-lg font-bold text-primary">10. Server-Side Request Forgery (SSRF)</h3>
+                        <span class="text-xs dark:bg-teal-900 dark:text-teal-300 px-2 py-1 rounded">Network</span>
                     </div>
-                    <p class="text-slate-400 text-sm">Engañar al servidor para que haga peticiones a recursos internos (AWS metadata, redes privadas) que no deberían ser accesibles desde fuera.</p>
+                    <p class="text-secondary text-sm">Engañar al servidor para que haga peticiones a recursos internos (AWS metadata, redes privadas) que no deberían ser accesibles desde fuera.</p>
                 </div>
 
             </div>
         </section>
 
+        <!-- SECTION 6: Official OWASP Resources -->
+        <section id="resources" class="py-12 border-t border-primary">
+            <h2 class="text-3xl font-bold text-primary mb-8 border-l-4 border-indigo-500 pl-4">Recursos Oficiales de OWASP</h2>
+            <p class="text-secondary mb-8 max-w-3xl">
+                Profundiza en cada tema utilizando la documentación oficial de OWASP, esencial para desarrolladores, testers y arquitectos de seguridad.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Link 1: OWASP Top 10 (English) -->
+                <a href="https://owasp.org/Top10/" target="_blank" rel="noopener noreferrer" class="block bg-surface rounded-lg p-6 shadow-lg border border-primary hover:bg-slate-700">
+                    <h3 class="text-xl font-bold text-cyan-500 mb-2">OWASP Top 10 (Original)</h3>
+                    <p class="text-secondary text-sm">Documentación oficial y análisis de riesgos en inglés.</p>
+                    <span class="mt-3 block text-xs text-secondary mono-font">owasp.org/Top10/</span>
+                </a>
+
+                <!-- Link 2: OWASP Top 10 (Spanish) -->
+                <a href="https://owasp.org/Top10/es/" target="_blank" rel="noopener noreferrer" class="block bg-surface rounded-lg p-6 shadow-lg border border-primary hover:bg-slate-700">
+                    <h3 class="text-xl font-bold text-cyan-500 mb-2">OWASP Top 10 (Español)</h3>
+                    <p class="text-secondary text-sm">Traducción oficial al idioma español.</p>
+                    <span class="mt-3 block text-xs text-secondary mono-font">owasp.org/Top10/es/</span>
+                </a>
+
+                <!-- Link 3: OWASP Dev Guide -->
+                <a href="https://devguide.owasp.org/" target="_blank" rel="noopener noreferrer" class="block bg-surface rounded-lg p-6 shadow-lg border border-primary hover:bg-slate-700">
+                    <h3 class="text-xl font-bold text-cyan-500 mb-2">OWASP Developer Guide</h3>
+                    <p class="text-secondary text-sm">Guía completa para desarrollar aplicaciones seguras.</p>
+                    <span class="mt-3 block text-xs text-secondary mono-font">devguide.owasp.org/</span>
+                </a>
+
+                <!-- Suggested Link 4: ASVS -->
+                <a href="https://owasp.org/www-project-application-security-verification-standard/" target="_blank" rel="noopener noreferrer" class="block bg-surface rounded-lg p-6 shadow-lg border border-primary hover:bg-slate-700">
+                    <h3 class="text-xl font-bold text-violet-500 mb-2">ASVS: Verification Standard</h3>
+                    <p class="text-secondary text-sm">El estándar para verificar y probar la seguridad de las aplicaciones.</p>
+                    <span class="mt-3 block text-xs text-secondary mono-font">owasp.org/www-project-asvs/</span>
+                </a>
+                
+                <!-- Suggested Link 5: Cheat Sheet Series -->
+                <a href="https://cheatsheetseries.owasp.org/" target="_blank" rel="noopener noreferrer" class="block bg-surface rounded-lg p-6 shadow-lg border border-primary hover:bg-slate-700">
+                    <h3 class="text-xl font-bold text-violet-500 mb-2">Cheat Sheet Series</h3>
+                    <p class="text-secondary text-sm">Colección de guías rápidas y prácticas sobre temas de seguridad específicos.</p>
+                    <span class="mt-3 block text-xs text-secondary mono-font">cheatsheetseries.owasp.org/</span>
+                </a>
+            </div>
+        </section>
+
+
         <!-- Conclusion -->
-        <footer class="mt-20 border-t border-slate-800 pt-10 text-center pb-10">
-            <h3 class="text-2xl font-bold text-white mb-4">Seguridad por Diseño, no por Accidente</h3>
-            <p class="text-slate-500 max-w-2xl mx-auto mb-6">
+        <footer class="mt-20 border-t border-primary pt-10 text-center pb-10">
+            <h3 class="text-2xl font-bold text-primary mb-4">Seguridad por Diseño, no por Accidente</h3>
+            <p class="text-secondary max-w-2xl mx-auto mb-6">
                 El OWASP Top 10 es un mapa, no el territorio. Utiliza esta lista como punto de partida para auditorías, capacitaciones y mejoras en tu ciclo de desarrollo de software seguro (SDLC).
             </p>
-            <!-- CORRECCIÓN: Atribución en el footer con enlace personal -->
-            <div class="text-xs text-slate-600">
+            <!-- Atribución en el footer con enlace personal -->
+            <div class="text-xs dark:text-slate-600">
                 Diseño y Contenido basado en OWASP Top 10 - 2021. 
-                <a href="https://github.com/rdariopv" target="_blank" class="text-cyan-400 hover:text-cyan-300 transition-colors">
+                <a href="https://github.com/rdariopv" target="_blank" class="text-cyan-500 hover:text-cyan-400">
                     Creado por rdariopv
                 </a> 
                 (Powered by Gemini AI).
             </div>
-            <!-- FIN CORRECCIÓN -->
+            <!-- FIN Atribución -->
         </footer>
 
     </main>
 
     <script>
-        // --- UTILITY: Label Wrapping Logic (>16 chars) ---
-        function wrapLabels(labels) {
-            return labels.map(label => {
-                if (label.length > 16) {
-                    const words = label.split(' ');
-                    const lines = [];
-                    let currentLine = words[0];
-
-                    for (let i = 1; i < words.length; i++) {
-                        if ((currentLine + " " + words[i]).length <= 16) {
-                            currentLine += " " + words[i];
-                        } else {
-                            lines.push(currentLine);
-                            currentLine = words[i];
-                        }
-                    }
-                    lines.push(currentLine);
-                    return lines;
-                }
-                return label;
-            });
-        }
-
-        // --- SHARED: Chart Defaults for Dark Theme ---
-        Chart.defaults.color = '#94a3b8'; // Slate 400
-        Chart.defaults.borderColor = '#334155'; // Slate 700
-        Chart.defaults.font.family = "'Inter', sans-serif";
-
-        const tooltipPlugin = {
-            tooltip: {
-                backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                titleColor: '#22d3ee',
-                bodyColor: '#f1f5f9',
-                borderColor: '#334155',
-                borderWidth: 1,
-                padding: 10,
-                callbacks: {
-                    title: function(tooltipItems) {
-                        const item = tooltipItems[0];
-                        let label = item.chart.data.labels[item.dataIndex];
-                        if (Array.isArray(label)) {
-                            return label.join(' ');
-                        } else {
-                            return label;
-                        }
-                    }
-                }
-            }
-        };
-
-        // --- DATA: OWASP Top 10 Items ---
+        // Variables globales para las instancias de Chart.js
+        let rankingChartInstance = null;
+        let radarChartInstance = null;
+        
+        // --- DATA: OWASP Top 10 Items (Declarado globalmente para evitar ReferenceError) ---
         const rawLabels = [
             "Broken Access Control",
             "Cryptographic Failures",
@@ -435,163 +422,243 @@
             "SSRF"
         ];
         
-        // Process labels for wrapping
+        // --- UTILITY: Label Wrapping Logic (>16 chars) ---
+        function wrapLabels(labels) {
+            return labels.map(label => {
+                if (label.length > 16) {
+                    const words = label.split(' ');
+                    const lines = [];
+                    let currentLine = words[0];
+
+                    for (let i = 1; i < words.length; i++) {
+                        // Verifica si agregar la siguiente palabra excede el límite
+                        if ((currentLine + " " + words[i]).length <= 16) {
+                            currentLine += " " + words[i];
+                        } else {
+                            // Si excede, guarda la línea actual e inicia una nueva
+                            lines.push(currentLine);
+                            currentLine = words[i];
+                        }
+                    }
+                    lines.push(currentLine);
+                    return lines;
+                }
+                return label;
+            });
+        }
+        
+        // Process labels for wrapping (Declarado aquí para usar la función wrapLabels sin problema)
         const processedLabels = wrapLabels(rawLabels);
 
-        // --- CHART 1: Horizontal Bar (Ranking) ---
-        const ctxRanking = document.getElementById('rankingChart').getContext('2d');
-        new Chart(ctxRanking, {
-            type: 'bar',
-            data: {
-                labels: processedLabels,
-                datasets: [{
-                    label: 'Severidad Relativa (Posición Invertida)',
-                    // Gradient creation would happen in context, using simple colors for stability
-                    backgroundColor: [
-                        '#06b6d4', // Cyan (Rank 1)
-                        '#8b5cf6', // Violet
-                        '#ec4899', // Pink
-                        '#3b82f6', // Blue
-                        '#eab308', // Yellow
-                        '#f97316', // Orange
-                        '#ef4444', // Red
-                        '#6366f1', // Indigo
-                        '#64748b', // Slate
-                        '#14b8a6'  // Teal (Rank 10)
-                    ],
-                    data: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1], // Inverted rank for visual size
-                    borderRadius: 4,
-                    barPercentage: 0.7
-                }]
-            },
-            options: {
-                indexAxis: 'y', // Horizontal bar
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        grid: { display: true, color: '#1e293b' },
-                        title: { display: true, text: 'Nivel de Prioridad' }
-                    },
-                    y: {
-                        grid: { display: false }
-                    }
-                },
-                plugins: {
-                    legend: { display: false },
-                    ...tooltipPlugin
-                }
-            }
-        });
-
-        // --- CHART 2: Radar Chart (Top 3 Comparison) ---
-        const ctxRadar = document.getElementById('radarChart').getContext('2d');
-        const radarLabels = wrapLabels(["Exploitability", "Prevalence", "Detectability", "Tech Impact"]);
+        // --- CHART RENDERING LOGIC ---
         
-        new Chart(ctxRadar, {
-            type: 'radar',
-            data: {
-                labels: radarLabels,
-                datasets: [
-                    {
-                        label: 'Access Control',
-                        data: [8, 9, 6, 8], // High prevalence, high impact
-                        backgroundColor: 'rgba(6, 182, 212, 0.2)', // Cyan transparent
-                        borderColor: '#06b6d4',
-                        pointBackgroundColor: '#06b6d4'
-                    },
-                    {
-                        label: 'Crypto Failures',
-                        data: [6, 7, 4, 9], // Harder to exploit, huge impact (data leak)
-                        backgroundColor: 'rgba(139, 92, 246, 0.2)', // Violet transparent
-                        borderColor: '#8b5cf6',
-                        pointBackgroundColor: '#8b5cf6'
-                    },
-                    {
-                        label: 'Injection',
-                        data: [9, 7, 8, 9], // Very easy to exploit, high impact
-                        backgroundColor: 'rgba(236, 72, 153, 0.2)', // Pink transparent
-                        borderColor: '#ec4899',
-                        pointBackgroundColor: '#ec4899'
+        function renderCharts() {
+            // Theme parameters fixed to 'dark' for stability
+            const isDark = true; 
+
+            // --- Chart.js Defaults based on the fixed Dark Theme ---
+            const primaryTextColor = '#f1f5f9'; // Slate 100
+            const secondaryTextColor = '#94a3b8'; // Slate 400
+            const gridColor = '#334155'; // Slate 700
+            const surfaceColor = 'rgba(30, 41, 59, 0.9)'; // Slate 800
+
+            Chart.defaults.color = secondaryTextColor;
+            Chart.defaults.borderColor = gridColor;
+            Chart.defaults.font.family = "'Inter', sans-serif";
+
+            const tooltipPlugin = {
+                tooltip: {
+                    backgroundColor: surfaceColor,
+                    titleColor: '#06b6d4', // Cyan 500
+                    bodyColor: primaryTextColor,
+                    borderColor: gridColor,
+                    borderWidth: 1,
+                    padding: 10,
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            // Reconstruye el texto si se dividió en líneas
+                            if (Array.isArray(label)) {
+                                return label.join(' ');
+                            } else {
+                                return label;
+                            }
+                        }
                     }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    r: {
-                        angleLines: { color: '#334155' },
-                        grid: { color: '#1e293b' },
-                        pointLabels: { color: '#f1f5f9', font: { size: 11 } },
-                        suggestedMin: 0,
-                        suggestedMax: 10
-                    }
-                },
-                plugins: {
-                    legend: { labels: { color: '#cbd5e1' } },
-                    ...tooltipPlugin
                 }
-            }
-        });
+            };
+            
+            // Destruir instancias previas si existen
+            if (rankingChartInstance) rankingChartInstance.destroy();
+            if (radarChartInstance) radarChartInstance.destroy();
 
-        // --- CHART 3: Plotly Risk Matrix (Scatter WebGL) ---
-        // Simulating Impact vs Likelihood for all 10 items
-        const trace1 = {
-            x: [9, 6, 8, 7, 7, 8, 7, 6, 5, 4], // Likelihood (Prevalence)
-            y: [8, 9, 9, 7, 6, 6, 5, 8, 5, 6], // Technical Impact
-            text: rawLabels, // Hover text
-            mode: 'markers+text',
-            type: 'scatter', // Plotly uses WebGL/Canvas with 'scatter' if configured or large data, but standard scatter is SVG/Canvas hybrid.
-            // Note: To force non-SVG in strict Plotly contexts usually requires 'scattergl', but for <20 points 'scatter' is more compatible and renders fine in Canvas mode if config is set.
-            // However, to follow strict instructions, we rely on Plotly's rendering engine.
-            textposition: 'top center',
-            marker: {
-                size: [25, 22, 22, 18, 16, 15, 14, 14, 12, 10], // Size based on rank
-                color: [
-                    '#06b6d4', '#8b5cf6', '#ec4899', '#3b82f6', 
-                    '#eab308', '#f97316', '#ef4444', '#6366f1', 
-                    '#64748b', '#14b8a6'
-                ],
-                opacity: 0.8,
-                line: { color: 'white', width: 1 }
-            },
-            textfont: {
-                family: 'Inter, sans-serif',
-                color: '#cbd5e1'
-            }
+
+            // --- CHART 1: Horizontal Bar (Ranking) ---
+            const ctxRanking = document.getElementById('rankingChart').getContext('2d');
+            rankingChartInstance = new Chart(ctxRanking, {
+                type: 'bar',
+                data: {
+                    // processedLabels ahora se accede de forma segura como variable global
+                    labels: processedLabels, 
+                    datasets: [{
+                        label: 'Severidad Relativa (Posición Invertida)',
+                        backgroundColor: [
+                            '#06b6d4', // Cyan (Rank 1)
+                            '#8b5cf6', // Violet
+                            '#ec4899', // Pink
+                            '#3b82f6', // Blue
+                            '#eab308', // Yellow
+                            '#f97316', // Orange
+                            '#ef4444', // Red
+                            '#6366f1', // Indigo
+                            '#64748b', // Slate
+                            '#14b8a6'  // Teal (Rank 10)
+                        ],
+                        data: [10, 9, 8, 7, 6, 5, 4, 3, 2, 1], // Inverted rank for visual size
+                        borderRadius: 4,
+                        barPercentage: 0.7
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Horizontal bar
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { display: true, color: gridColor },
+                            title: { display: true, text: 'Nivel de Prioridad', color: primaryTextColor }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: { color: primaryTextColor }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        ...tooltipPlugin
+                    }
+                }
+            });
+
+            // --- CHART 2: Radar Chart (Top 3 Comparison) ---
+            const ctxRadar = document.getElementById('radarChart').getContext('2d');
+            const radarLabels = wrapLabels(["Exploitability", "Prevalence", "Detectability", "Tech Impact"]);
+            
+            radarChartInstance = new Chart(ctxRadar, {
+                type: 'radar',
+                data: {
+                    labels: radarLabels,
+                    datasets: [
+                        {
+                            label: 'Access Control',
+                            data: [8, 9, 6, 8],
+                            backgroundColor: 'rgba(6, 182, 212, 0.2)', // Cyan 500, 20%
+                            borderColor: '#06b6d4', // Cyan 500
+                            pointBackgroundColor: '#06b6d4'
+                        },
+                        {
+                            label: 'Crypto Failures',
+                            data: [6, 7, 4, 9], 
+                            backgroundColor: 'rgba(139, 92, 246, 0.2)', // Violet 500, 20%
+                            borderColor: '#8b5cf6', // Violet 500
+                            pointBackgroundColor: '#8b5cf6'
+                        },
+                        {
+                            label: 'Injection',
+                            data: [9, 7, 8, 9], 
+                            backgroundColor: 'rgba(236, 72, 153, 0.2)', // Pink 500, 20%
+                            borderColor: '#ec4899', // Pink 500
+                            pointBackgroundColor: '#ec4899'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: gridColor },
+                            grid: { color: gridColor },
+                            pointLabels: { color: primaryTextColor, font: { size: 11 } },
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                            ticks: { backdropColor: '#1e293b', color: secondaryTextColor } // Slate 800 background
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: primaryTextColor } },
+                        ...tooltipPlugin
+                    }
+                }
+            });
+            
+            // --- CHART 3: Plotly Risk Matrix (Scatter WebGL) ---
+            
+            const trace1 = {
+                x: [9, 6, 8, 7, 7, 8, 7, 6, 5, 4], // Likelihood (Prevalence)
+                y: [8, 9, 9, 7, 6, 6, 5, 8, 5, 6], // Technical Impact
+                text: rawLabels,
+                mode: 'markers+text',
+                type: 'scatter',
+                textposition: 'top center',
+                marker: {
+                    size: [25, 22, 22, 18, 16, 15, 14, 14, 12, 10],
+                    color: [
+                        '#06b6d4', '#8b5cf6', '#ec4899', '#3b82f6', 
+                        '#eab308', '#f97316', '#ef4444', '#6366f1', 
+                        '#64748b', '#14b8a6'
+                    ],
+                    opacity: 0.8,
+                    line: { color: primaryTextColor, width: 1 }
+                },
+                textfont: {
+                    family: 'Inter, sans-serif',
+                    color: primaryTextColor 
+                }
+            };
+
+            const layout = {
+                paper_bgcolor: 'rgba(0,0,0,0)', // Transparente
+                plot_bgcolor: 'rgba(30, 41, 59, 0.5)', // Slate 800 semi-transparente
+                margin: { t: 20, r: 20, b: 50, l: 50 },
+                xaxis: {
+                    title: 'Probabilidad / Prevalencia',
+                    range: [0, 10],
+                    color: secondaryTextColor,
+                    gridcolor: gridColor,
+                    zerolinecolor: gridColor,
+                    showline: true,
+                    linecolor: gridColor
+                },
+                yaxis: {
+                    title: 'Impacto Técnico',
+                    range: [0, 10],
+                    color: secondaryTextColor,
+                    gridcolor: gridColor,
+                    zerolinecolor: gridColor,
+                    showline: true,
+                    linecolor: gridColor
+                },
+                showlegend: false,
+                hovermode: 'closest',
+                font: { color: primaryTextColor }
+            };
+
+            const config = {
+                responsive: true,
+                displayModeBar: false,
+                renderer: 'canvas' // Request canvas rendering
+            };
+
+            Plotly.newPlot('riskMatrix', [trace1], layout, config);
+        }
+        
+        // Initial chart render on load (Ya no depende de setTheme, se llama directamente)
+        window.onload = function() {
+            renderCharts();
         };
-
-        const layout = {
-            paper_bgcolor: 'rgba(0,0,0,0)',
-            plot_bgcolor: 'rgba(30, 41, 59, 0.5)', // Slate 800 half transparent
-            margin: { t: 20, r: 20, b: 50, l: 50 },
-            xaxis: {
-                title: 'Probabilidad / Prevalencia',
-                range: [0, 10],
-                color: '#94a3b8',
-                gridcolor: '#334155',
-                zerolinecolor: '#334155'
-            },
-            yaxis: {
-                title: 'Impacto Técnico',
-                range: [0, 10],
-                color: '#94a3b8',
-                gridcolor: '#334155',
-                zerolinecolor: '#334155'
-            },
-            showlegend: false,
-            hovermode: 'closest'
-        };
-
-        const config = {
-            responsive: true,
-            displayModeBar: false,
-            renderer: 'canvas' // Request canvas rendering
-        };
-
-        Plotly.newPlot('riskMatrix', [trace1], layout, config);
 
     </script>
 </body>
